@@ -18,6 +18,7 @@ Object.assign(wisp.options, {
 	allow_udp_streams: false,
 	hostname_blacklist: [/example\.com/],
 	dns_servers: ["1.1.1.3", "1.0.0.3"],
+	proxy: "socks5://127.0.0.1:40000",
 });
 
 const fastify = Fastify({
