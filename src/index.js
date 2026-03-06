@@ -7,6 +7,7 @@ import fastifyStatic from "@fastify/static";
 import { scramjetPath } from "@mercuryworkshop/scramjet/path";
 import { libcurlPath } from "@mercuryworkshop/libcurl-transport";
 import { baremuxPath } from "@mercuryworkshop/bare-mux/node";
+import net from "net";
 import { SocksClient } from "socks";
 
 const publicPath = fileURLToPath(new URL("../public/", import.meta.url));
@@ -19,11 +20,37 @@ const PROXY = {
 	password: "7gehk0l6v9li"
 };
 
+// Patch net.Socket to route all outbound connections through SOCKS5
+const originalConnect = net.Socket.prototype.connect;
+net.Socket.prototype.connect = function(options, ...args) {
+	const host = typeof options === "object" ? options.host : null;
+	const port = typeof options === "object" ? options.port : null;
+	if (host && port && host !== "127.0.0.1" && host !== "localhost") {
+		const self = this;
+		SocksClient.createConnection({
+			proxy: PROXY,
+			command: "connect",
+			destination: { host, port: Number(port) }
+		}).then(({ socket }) => {
+			self._handle = socket._handle;
+			socket._handle = null;
+			self.emit("connect");
+			socket.pipe(self);
+			self.pipe(socket);
+		}).catch((err) => {
+			self.emit("error", err);
+		});
+		return this;
+	}
+	return originalConnect.call(this, options, ...args);
+};
+
 logging.set_level(logging.NONE);
 Object.assign(wisp.options, {
 	allow_udp_streams: false,
 	hostname_blacklist: [/example\.com/],
 	dns_servers: ["1.1.1.3", "1.0.0.3"],
+	dns_method: async (hostname) => hostname,
 });
 
 const fastify = Fastify({
@@ -40,17 +67,6 @@ const fastify = Fastify({
 			});
 	},
 });
-
-wisp.options.dns_servers = ["1.1.1.3", "1.0.0.3"];
-wisp.options.createConnection = (hostname, port, callback) => {
-	SocksClient.createConnection({
-		proxy: PROXY,
-		command: "connect",
-		destination: { host: hostname, port: port }
-	}).then(({ socket }) => {
-		callback(null, socket);
-	}).catch(callback);
-};
 
 fastify.register(fastifyStatic, {
 	root: publicPath,
