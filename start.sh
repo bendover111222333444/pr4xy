@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
-
-./wgcf register --accept-tos
+./wgcf register           # if you need to register or update profile
 ./wgcf generate
-
 ./wireproxy -c wgcf-profile.conf &
-
 npm start
