@@ -7,18 +7,17 @@ import fastifyStatic from "@fastify/static";
 import { scramjetPath } from "@mercuryworkshop/scramjet/path";
 import { libcurlPath } from "@mercuryworkshop/libcurl-transport";
 import { baremuxPath } from "@mercuryworkshop/bare-mux/node";
-import { SocksProxyAgent } from "socks-proxy-agent";
-import net from "net";
+import { SocksClient } from "socks";
 
 const publicPath = fileURLToPath(new URL("../public/", import.meta.url));
 
-const agent = new SocksProxyAgent("socks5://tlaqdnkf:7gehk0l6v9li@198.23.239.134:6540");
-const _createConnection = net.createConnection;
-net.createConnection = (options, callback) => {
-  return agent.createConnection(options, callback);
+const PROXY = {
+	host: "198.23.239.134",
+	port: 6540,
+	type: 5,
+	userId: "tlaqdnkf",
+	password: "7gehk0l6v9li"
 };
-
-// Wisp Configuration: Refer to the documentation at https://www.npmjs.com/package/@mercuryworkshop/wisp-js
 
 logging.set_level(logging.NONE);
 Object.assign(wisp.options, {
@@ -42,23 +41,31 @@ const fastify = Fastify({
 	},
 });
 
+wisp.options.dns_servers = ["1.1.1.3", "1.0.0.3"];
+wisp.options.createConnection = (hostname, port, callback) => {
+	SocksClient.createConnection({
+		proxy: PROXY,
+		command: "connect",
+		destination: { host: hostname, port: port }
+	}).then(({ socket }) => {
+		callback(null, socket);
+	}).catch(callback);
+};
+
 fastify.register(fastifyStatic, {
 	root: publicPath,
 	decorateReply: true,
 });
-
 fastify.register(fastifyStatic, {
 	root: scramjetPath,
 	prefix: "/scram/",
 	decorateReply: false,
 });
-
 fastify.register(fastifyStatic, {
 	root: libcurlPath,
 	prefix: "/libcurl/",
 	decorateReply: false,
 });
-
 fastify.register(fastifyStatic, {
 	root: baremuxPath,
 	prefix: "/baremux/",
@@ -71,9 +78,6 @@ fastify.setNotFoundHandler((res, reply) => {
 
 fastify.server.on("listening", () => {
 	const address = fastify.server.address();
-
-	// by default we are listening on 0.0.0.0 (every interface)
-	// we just need to list a few
 	console.log("Listening on:");
 	console.log(`\thttp://localhost:${address.port}`);
 	console.log(`\thttp://${hostname()}:${address.port}`);
@@ -86,7 +90,6 @@ fastify.server.on("listening", () => {
 
 process.on("SIGINT", shutdown);
 process.on("SIGTERM", shutdown);
-
 function shutdown() {
 	console.log("SIGTERM signal received: closing HTTP server");
 	fastify.close();
@@ -94,9 +97,7 @@ function shutdown() {
 }
 
 let port = parseInt(process.env.PORT || "");
-
 if (isNaN(port)) port = 8080;
-
 fastify.listen({
 	port: port,
 	host: "0.0.0.0",
