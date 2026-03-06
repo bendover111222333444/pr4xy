@@ -25,7 +25,7 @@
 		"@mercuryworkshop/libcurl-transport": "^1.5.2",
 		"@mercuryworkshop/scramjet": "https://github.com/MercuryWorkshop/scramjet/releases/download/latest/mercuryworkshop-scramjet-2.0.0-alpha.tgz",
 		"@mercuryworkshop/wisp-js": "^0.4.1",
-		"socks-proxy-agent": "^8.0.4"
+		"socks-proxy-agent": "^8.0.4",
 		"ws": "^8.18.3"
 	},
 	"devDependencies": {
