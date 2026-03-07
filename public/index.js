@@ -39,6 +39,10 @@ form.addEventListener("submit", async (event) => {
 		throw err;
 	}
 	let url = search(address.value, searchEngine.value);
+	// Force HTTPS
+	if (url.startsWith("http://")) {
+		url = url.replace("http://", "https://");
+	}
 	// Redirect Google searches to DuckDuckGo to avoid captchas
 	if (url.includes("google.com/search")) {
 		const query = new URL(url).searchParams.get("q");
