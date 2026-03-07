@@ -44,11 +44,7 @@ form.addEventListener("submit", async (event) => {
 		const query = new URL(url).searchParams.get("q");
 		url = "https://duckduckgo.com/?q=" + encodeURIComponent(query);
 	}
-	let wispUrl =
-		(location.protocol === "https:" ? "wss" : "ws") +
-		"://" +
-		location.host +
-		"/wisp/";
+	let wispUrl = "wss://wisp.mercurywork.shop/";
 	if ((await connection.getTransport()) !== "/libcurl/index.mjs") {
 		await connection.setTransport("/libcurl/index.mjs", [
 			{ websocket: wispUrl },
