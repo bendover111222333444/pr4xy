@@ -12,15 +12,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: davidisthedavidofthewest1231
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
       - name: Build and Push
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: davidisthedavidofthewest1231/scramjetprxy:latest
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKER_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: |
+          echo "$DOCKER_TOKEN" | docker login -u "$DOCKER_USERNAME" --password-stdin
+          docker build -t davidisthedavidofthewest1231/scramjetprxy:latest .
+          docker push davidisthedavidofthewest1231/scramjetprxy:latest
