@@ -45,11 +45,9 @@ form.addEventListener("submit", async (event) => {
 		url = "https://duckduckgo.com/?q=" + encodeURIComponent(query);
 	}
 	let wispUrl = "wss://wisp.mercurywork.shop/";
-	if ((await connection.getTransport()) !== "/libcurl/index.mjs") {
-		await connection.setTransport("/libcurl/index.mjs", [
-			{ websocket: wispUrl },
-		]);
-	}
+	await connection.setTransport("/libcurl/index.mjs", [
+	    { websocket: wispUrl },
+	]);
 	const frame = scramjet.createFrame();
 	frame.frame.id = "sj-frame";
 	document.body.appendChild(frame.frame);
