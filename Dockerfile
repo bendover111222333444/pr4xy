@@ -10,6 +10,6 @@ RUN apk add --upgrade --no-cache python3 py3-pip make g++ bash
 RUN npm install -g pnpm && pnpm install --prod
 RUN pip install wisp-python --break-system-packages
 COPY . .
-RUN chmod +x wireproxy start.sh
+RUN chmod +x start.sh
 ENTRYPOINT [ "bash" ]
 CMD ["start.sh"]
