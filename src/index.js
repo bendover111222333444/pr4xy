@@ -8,8 +8,10 @@ import { scramjetPath } from "@mercuryworkshop/scramjet/path";
 import { libcurlPath } from "@mercuryworkshop/libcurl-transport";
 import { baremuxPath } from "@mercuryworkshop/bare-mux/node";
 import net from "net";
+import { join } from "path";
 
 const publicPath = fileURLToPath(new URL("../public/", import.meta.url));
+const scramCustomPath = fileURLToPath(new URL("../public/scram-custom/", import.meta.url));
 
 logging.set_level(logging.NONE);
 
@@ -51,6 +53,11 @@ fastify.register(fastifyStatic, {
 fastify.register(fastifyStatic, {
 	root: scramjetPath,
 	prefix: "/scram/",
+	decorateReply: false,
+});
+fastify.register(fastifyStatic, {
+	root: scramCustomPath,
+	prefix: "/scram-custom/",
 	decorateReply: false,
 });
 fastify.register(fastifyStatic, {
