@@ -44,7 +44,7 @@ form.addEventListener("submit", async (event) => {
 		const query = new URL(url).searchParams.get("q");
 		url = "https://duckduckgo.com/?q=" + encodeURIComponent(query);
 	}
-	let wispUrl = "wss://patient-feather-b579.sigmasigmaonthewallwhoisthe2.workers.dev/";
+	let wispUrl = "wss://dogballs.sigmasigmaonthewallwhoisthe2.workers.dev/";
 	await connection.setTransport("/libcurl/index.mjs", [
 	    { websocket: wispUrl, replace: true },
 	]);
