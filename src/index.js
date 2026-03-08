@@ -71,6 +71,21 @@ fastify.register(fastifyStatic, {
 	decorateReply: false,
 });
 
+// Proxy requests (/scramjet/*) should be handled by the service worker.
+// If this route is hit, the SW wasn't controlling the page yet.
+fastify.get("/scramjet/*", async (request, reply) => {
+	return reply
+		.code(200)
+		.type("text/html")
+		.send(
+			`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Proxy</title></head><body style="background:#111;color:#fff;font-family:sans-serif;padding:2rem;max-width:40rem;">
+<h1>Proxy not ready</h1>
+<p>This request was handled by the server instead of the service worker. That usually means the worker wasn't active yet.</p>
+<p><strong>Refresh the page</strong> (F5 or Ctrl+R), then try your search again.</p>
+</body></html>`
+		);
+});
+
 fastify.setNotFoundHandler((res, reply) => {
 	return reply.code(404).type("text/html").sendFile("404.html");
 });

@@ -38,6 +38,22 @@ form.addEventListener("submit", async (event) => {
 		errorCode.textContent = err.toString();
 		throw err;
 	}
+	// Wait for SW to control this page (needed so /scramjet/* is intercepted, not the server)
+	if (!navigator.serviceWorker.controller) {
+		const claimed = await new Promise((resolve) => {
+			const t = setTimeout(() => resolve(false), 5000);
+			navigator.serviceWorker.addEventListener("controllerchange", () => {
+				clearTimeout(t);
+				resolve(true);
+			}, { once: true });
+		});
+		if (!claimed) {
+			error.textContent = "Service worker not ready. Refresh the page and try again.";
+			return;
+		}
+	}
+	error.textContent = "";
+	errorCode.textContent = "";
 	let url = search(address.value, searchEngine.value);
 	// Redirect Google searches to DuckDuckGo to avoid captchas
 	if (url.includes("google.com/search")) {
@@ -45,11 +61,22 @@ form.addEventListener("submit", async (event) => {
 		url = "https://duckduckgo.com/?q=" + encodeURIComponent(query);
 	}
 	let wispUrl = "wss://dogballs.sigmasigmaonthewallwhoisthe2.workers.dev/";
-	await connection.setTransport("/libcurl/index.mjs", [
-	    { websocket: wispUrl, replace: true },
-	]);
+	try {
+		await connection.setTransport("/libcurl/index.mjs", [
+			{ websocket: wispUrl, replace: true },
+		]);
+	} catch (err) {
+		error.textContent = "Could not connect to proxy transport (Wisp). Check Network tab for WebSocket errors.";
+		errorCode.textContent = String(err?.message || err);
+		return;
+	}
 	const frame = scramjet.createFrame();
 	frame.frame.id = "sj-frame";
 	document.body.appendChild(frame.frame);
-	frame.go(url);
+	try {
+		frame.go(url);
+	} catch (err) {
+		error.textContent = "Navigation failed.";
+		errorCode.textContent = String(err?.message || err);
+	}
 });
