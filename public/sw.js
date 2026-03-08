@@ -8,34 +8,35 @@ async function handleRequest(event) {
 
 	await scramjet.loadConfig();
 
-	// Let Scramjet handle its normal routes first
+	// Already a Scramjet-proxied URL? Just let it go
+	if (url.pathname.startsWith("/scramjet/")) {
+		return fetch(event.request);
+	}
+
+	// Normal Scramjet routing
 	if (scramjet.route(event)) {
 		return scramjet.fetch(event);
 	}
 
-	// Only rewrite if it's a truly external target
-	// Prevent fetching self
+	// Rewrite same-origin requests to the external target
 	if (
 		url.origin === self.location.origin &&
 		!url.pathname.startsWith("/scram")
 	) {
 		const target = scramjet.config?.url;
 
-		if (target && !target.startsWith(self.location.origin)) {
-			// Construct proxied URL using only the **external target**, never your own origin
-			const proxied =
-				"/scramjet/" +
-				encodeURIComponent(target + url.pathname + url.search);
+		if (target) {
+			// Build the external URL correctly
+			const externalUrl = new URL(url.pathname + url.search, target);
+
+			// Encode for Scramjet
+			const proxied = "/scramjet/" + encodeURIComponent(externalUrl.href);
 
 			return fetch(proxied, event.request);
-		} else {
-			// If the target is your own origin, abort to prevent recursion
-			console.warn("Blocked fetch to self-origin:", target);
-			return new Response("Cannot fetch self-origin URL", { status: 400 });
 		}
 	}
 
-	// Default: just fetch normally
+	// Default fallback
 	return fetch(event.request);
 }
 
