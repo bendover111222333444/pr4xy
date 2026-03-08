@@ -10,16 +10,15 @@ async function registerSW() {
 			!swAllowedHostnames.includes(location.hostname)
 		)
 			throw new Error("Service workers cannot be registered without https.");
-
 		throw new Error("Your browser doesn't support service workers.");
 	}
 
-	// Unregister any existing broken service workers first
-	const registrations = await navigator.serviceWorker.getRegistrations();
-	for (const reg of registrations) {
-		await reg.unregister();
+	const reg = await navigator.serviceWorker.register(stockSW);
+	
+	if (!navigator.serviceWorker.controller) {
+		await reg.update();
+		await new Promise(resolve => {
+			navigator.serviceWorker.addEventListener("controllerchange", resolve, { once: true });
+		});
 	}
-
-	await navigator.serviceWorker.register(stockSW);
-	await navigator.serviceWorker.ready;
 }
