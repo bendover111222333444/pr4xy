@@ -1,24 +1,30 @@
-"use strict";
-const stockSW = "./sw.js";
+importScripts("/scram-custom/scramjet.all.js");
 
-const swAllowedHostnames = ["localhost", "127.0.0.1"];
+self.addEventListener("install", (event) => {
+    self.skipWaiting();
+});
 
-async function registerSW() {
-	if (!navigator.serviceWorker) {
-		if (
-			location.protocol !== "https:" &&
-			!swAllowedHostnames.includes(location.hostname)
-		)
-			throw new Error("Service workers cannot be registered without https.");
-		throw new Error("Your browser doesn't support service workers.");
-	}
+self.addEventListener("activate", (event) => {
+    event.waitUntil(clients.claim());
+});
 
-	const reg = await navigator.serviceWorker.register(stockSW);
-	
-	if (!navigator.serviceWorker.controller) {
-		await reg.update();
-		await new Promise(resolve => {
-			navigator.serviceWorker.addEventListener("controllerchange", resolve, { once: true });
-		});
-	}
+self.addEventListener("message", (event) => {
+    if (event.data === "skipWaiting") {
+        self.skipWaiting();
+    }
+});
+
+const { ScramjetServiceWorker } = $scramjetLoadWorker();
+const scramjet = new ScramjetServiceWorker();
+
+async function handleRequest(event) {
+    await scramjet.loadConfig();
+    if (scramjet.route(event)) {
+        return scramjet.fetch(event);
+    }
+    return fetch(event.request);
 }
+
+self.addEventListener("fetch", (event) => {
+    event.respondWith(handleRequest(event));
+});
