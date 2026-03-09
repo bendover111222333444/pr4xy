@@ -12,10 +12,7 @@ const scramjet = new ScramjetServiceWorker();
 async function handleRequest(event) {
     const url = new URL(event.request.url);
 
-    // Block video hover previews (storyboards)
-    if (url.pathname.includes("/storyboard")) {
-        return new Response(null, { status: 204 });
-    }
+    // shh
 
     await scramjet.loadConfig();
     if (scramjet.route(event)) {
