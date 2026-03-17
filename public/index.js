@@ -44,9 +44,13 @@ form.addEventListener("submit", async (event) => {
 		const query = new URL(url).searchParams.get("q");
 		url = "https://duckduckgo.com/?q=" + encodeURIComponent(query);
 	}
-	let wispUrl = "wss://zaaiobmfvddv.us-west-1.clawcloudrun.com/wisp/";
 	await connection.setTransport("/libcurl/index.mjs", [
-	    { websocket: wispUrl, replace: true },
+		{ websocket: [
+			"wss://dogballs.sigmasigmaonthewallwhoisthe2.workers.dev/",
+			"wss://lively-bush-0aa7.sigmasigmaonthewallwhoisthe2.workers.dev/",
+			"wss://shy-mouse-7929.sigmasigmaonthewallwhoisthe2.workers.dev/",
+			"wss://patient-waterfall-ec44.sigmasigmaonthewallwhoisthe2.workers.dev/",
+		], replace: true },
 	]);
 	const frame = scramjet.createFrame();
 	frame.frame.id = "sj-frame";
