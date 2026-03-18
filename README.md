@@ -25,7 +25,7 @@ Ensure you are not hosting on a datacenter IP for CAPTCHAs to work reliably alon
 
 ## Setup / Usage
 
-You will need Node.js 16.x (and above) and Git installed; below is an example for Debian/Ubuntu setup.
+You will need Node.js 16.x (and above) and Git installed; below is an example for Debian/Ubuntu setup. 
 
 ```
 sudo apt update
