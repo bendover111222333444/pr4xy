@@ -5,13 +5,13 @@ import { server as wisp, logging } from "@mercuryworkshop/wisp-js/server";
 import Fastify from "fastify";
 import fastifyStatic from "@fastify/static";
 import { scramjetPath } from "@mercuryworkshop/scramjet/path";
-import { libcurlPath } from "@mercuryworkshop/libcurl-transport";
 import net from "net";
 import { join } from "path";
 
 const publicPath = fileURLToPath(new URL("../public/", import.meta.url));
 const scramCustomPath = fileURLToPath(new URL("../public/scram-custom/", import.meta.url));
 const baremuxPath = fileURLToPath(new URL("../public/baremux/", import.meta.url));
+const libcurlPath = fileURLToPath(new URL("../public/libcurl/", import.meta.url));
 
 logging.set_level(logging.NONE);
 
