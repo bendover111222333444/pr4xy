@@ -15,11 +15,10 @@ async function registerSW() {
 
     await navigator.serviceWorker.register(stockSW);
 
-    await new Promise(resolve => setTimeout(resolve, 500));
+    const reg = await navigator.serviceWorker.ready;
+    reg.active.postMessage("claim");
 
     if (!navigator.serviceWorker.controller) {
-        const reg = await navigator.serviceWorker.ready;
-        reg.active.postMessage("claim");
         await new Promise(resolve => {
             navigator.serviceWorker.addEventListener("controllerchange", resolve, { once: true });
         });
