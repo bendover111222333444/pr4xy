@@ -8,7 +8,7 @@ self.addEventListener("message", (event) => {
     if (event.data === "claim") {
         self.clients.claim();
     }
-    if (event.data === "transportReady") {
+    if (event.data?.type === "transportReady") {
         transportReadyResolve();
     }
 });
