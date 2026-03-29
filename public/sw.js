@@ -9,9 +9,11 @@ self.addEventListener("message", (event) => {
         self.clients.claim();
     }
     if (event.data?.type === "transportReady") {
+        console.log("sw: transportReady received, unblocking fetches");
         transportReadyResolve();
     }
 });
+
 
 self.addEventListener("activate", (event) => {
     event.waitUntil(self.clients.claim());
