@@ -6371,30 +6371,31 @@ var LibcurlClient = class {
       }
     }
   }
- async init() {
-    if (this.transport)
-      libcurl.transport = this.transport;
-    libcurl.set_websocket(this.wisp);
-    if (!libcurl.ready) {
-      await new Promise((resolve) => {
-        libcurl.onload = () => {
-          resolve(null);
-        };
+  async init() {
+      if (this.transport)
+          libcurl.transport = this.transport;
+      libcurl.set_websocket(this.wisp);
+
+      // Wait for wasm BEFORE creating HTTPSession
+      if (!libcurl.ready) {
+          await new Promise((resolve) => {
+              libcurl.onload = () => {
+                  console.log("loaded libcurl.js v" + libcurl.version.lib);
+                  this.ready = true;
+                  resolve(null);
+              };
+          });
+      } else {
+          console.log("running libcurl.js v" + libcurl.version.lib);
+          this.ready = true;
+      }
+
+      // NOW create the session, wasm is guaranteed ready
+      this.session = new libcurl.HTTPSession({
+          proxy: this.proxy
       });
-    }
-    this.session = new libcurl.HTTPSession({
-      proxy: this.proxy
-    });
-    if (this.connections)
-      this.session.set_connections(...this.connections);
-    this.ready = true;
-    console.log("running libcurl.js v" + libcurl.version.lib);
-  }
-  ready = false;
-  async meta() {
-  }
-  setWisp(url) {
-    libcurl.set_websocket(url);
+      if (this.connections)
+          this.session.set_connections(...this.connections);
   }
   async request(remote, method, body, headers, signal) {
     libcurl.set_websocket(this.wisp);
