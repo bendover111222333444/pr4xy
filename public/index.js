@@ -50,7 +50,9 @@ form.addEventListener("submit", async (event) => {
     ]);
 
     // Signal SW that transport is ready
-    navigator.serviceWorker.controller.postMessage({ type: "transportReady" });
+   	const reg = await navigator.serviceWorker.getRegistration();
+	const sw = reg.active || reg.waiting || reg.installing;
+	sw.postMessage({ type: "transportReady" });
 
     let url = search(address.value, searchEngine.value);
     if (url.includes("google.com/search")) {
