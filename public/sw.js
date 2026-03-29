@@ -1,8 +1,15 @@
 importScripts("/scram-custom/scramjet.all.js");
 
+let transportReady;
+let transportReadyResolve;
+transportReady = new Promise(resolve => { transportReadyResolve = resolve; });
+
 self.addEventListener("message", (event) => {
     if (event.data === "claim") {
         self.clients.claim();
+    }
+    if (event.data === "transportReady") {
+        transportReadyResolve();
     }
 });
 
@@ -14,10 +21,7 @@ const { ScramjetServiceWorker } = $scramjetLoadWorker();
 const scramjet = new ScramjetServiceWorker();
 
 async function handleRequest(event) {
-    const url = new URL(event.request.url);
-
-    // shh
-
+    await transportReady;
     await scramjet.loadConfig();
     if (scramjet.route(event)) {
         return scramjet.fetch(event);

@@ -30,37 +30,36 @@ const scramjet = new ScramjetController({
 scramjet.init();
 const connection = new BareMux.BareMuxConnection("/baremux/worker.js");
 form.addEventListener("submit", async (event) => {
-	event.preventDefault();
+    event.preventDefault();
 
-	try {
-		await registerSW();
-	} catch (err) {
-		error.textContent = "Failed to register service worker.";
-		errorCode.textContent = err.toString();
-		throw err;
-	}
+    try {
+        await registerSW();
+    } catch (err) {
+        error.textContent = "Failed to register service worker.";
+        errorCode.textContent = err.toString();
+        throw err;
+    }
 
-	await connection.setTransport("/libcurl/index.mjs", [
-		{ websocket: [
-			"wss://dogballs.sigmasigmaonthewallwhoisthe2.workers.dev/",
-			"wss://lively-bush-0aa7.sigmasigmaonthewallwhoisthe2.workers.dev/",
-			"wss://shy-mouse-7929.sigmasigmaonthewallwhoisthe2.workers.dev/",
-			"wss://patient-waterfall-ec44.sigmasigmaonthewallwhoisthe2.workers.dev/",
-		], replace: true },
-	]);
+    await connection.setTransport("/libcurl/index.mjs", [
+        { websocket: [
+            "wss://dogballs.sigmasigmaonthewallwhoisthe2.workers.dev/",
+            "wss://lively-bush-0aa7.sigmasigmaonthewallwhoisthe2.workers.dev/",
+            "wss://shy-mouse-7929.sigmasigmaonthewallwhoisthe2.workers.dev/",
+            "wss://patient-waterfall-ec44.sigmasigmaonthewallwhoisthe2.workers.dev/",
+        ], replace: true },
+    ]);
 
-	// Wait for SW to acquire SharedWorker port and complete transport init
-	await new Promise(resolve => setTimeout(resolve, 2000));
+    // Signal SW that transport is ready
+    navigator.serviceWorker.controller.postMessage("transportReady");
 
-	let url = search(address.value, searchEngine.value);
-	// Redirect Google searches to DuckDuckGo to avoid captchas
-	if (url.includes("google.com/search")) {
-		const query = new URL(url).searchParams.get("q");
-		url = "https://duckduckgo.com/?q=" + encodeURIComponent(query);
-	}
+    let url = search(address.value, searchEngine.value);
+    if (url.includes("google.com/search")) {
+        const query = new URL(url).searchParams.get("q");
+        url = "https://duckduckgo.com/?q=" + encodeURIComponent(query);
+    }
 
-	const frame = scramjet.createFrame();
-	frame.frame.id = "sj-frame";
-	document.body.appendChild(frame.frame);
-	frame.go(url);
+    const frame = scramjet.createFrame();
+    frame.frame.id = "sj-frame";
+    document.body.appendChild(frame.frame);
+    frame.go(url);
 });
