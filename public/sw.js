@@ -1,8 +1,7 @@
 importScripts("/scram-custom/scramjet.all.js");
 
-let transportReady;
 let transportReadyResolve;
-transportReady = new Promise(resolve => { transportReadyResolve = resolve; });
+const transportReady = new Promise(resolve => { transportReadyResolve = resolve; });
 
 self.addEventListener("message", (event) => {
     if (event.data === "claim") {

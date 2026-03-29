@@ -11,11 +11,12 @@ async function registerSW() {
 
     const existing = await navigator.serviceWorker.getRegistration();
     if (existing) await existing.unregister();
-
+    
     await navigator.serviceWorker.register(stockSW);
-
     await new Promise(resolve => {
-        if (navigator.serviceWorker.controller) return resolve();
         navigator.serviceWorker.addEventListener("controllerchange", resolve, { once: true });
+        if (navigator.serviceWorker.controller) resolve();
     });
+    // Give the new SW a moment to fully initialize before any fetches fire
+    await new Promise(resolve => setTimeout(resolve, 500));
 }
